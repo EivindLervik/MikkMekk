@@ -12,8 +12,10 @@ public class Placement : MonoBehaviour {
     private GameObject placingNow;
     private Placeable placingNowScript;
     private Material placingNowMAT;
+    private int placingNowLayer;
     private bool active;
     private Camera cam;
+    private bool canPlace;
 
     private float placeDist = 4.0f;
 
@@ -35,7 +37,9 @@ public class Placement : MonoBehaviour {
             {
                 placingNow = (GameObject) Instantiate(placeables[currentlySelected], transform.position, Quaternion.identity);
                 placingNowScript = placingNow.GetComponent<Placeable>();
-                placingNowMAT = placingNow.GetComponent<Renderer>().material;
+                placingNowMAT = placingNow.GetComponentInChildren<Renderer>().material;
+                placingNowLayer = placingNow.layer;
+                placingNow.layer = 2;
             }
 
             // Move
@@ -43,13 +47,27 @@ public class Placement : MonoBehaviour {
             {
                 placingNow.transform.position = placePos;
 
+                // Can the object be placed based on own rules?
                 if (placingNowScript.CanPlace())
                 {
-                    placingNow.GetComponent<Renderer>().material = canPlaceMAT;
+                    placingNow.GetComponentInChildren<Renderer>().material = canPlaceMAT;
+                    canPlace = true;
                 }
                 else
                 {
-                    placingNow.GetComponent<Renderer>().material = canNotPlaceMAT;
+                    placingNow.GetComponentInChildren<Renderer>().material = canNotPlaceMAT;
+                    canPlace = false;
+                }
+
+                // Is inside something?
+                RaycastHit hit;
+                if (Physics.Raycast(ray, out hit, Vector3.Distance(cam.transform.position, placingNow.transform.position), placementMask))
+                {
+                    if(Vector3.Distance(hit.transform.position, placingNow.transform.position) < 0.5f)
+                    {
+                        placingNow.GetComponentInChildren<Renderer>().material = canNotPlaceMAT;
+                        canPlace = false;
+                    }
                 }
             }
         }
@@ -84,9 +102,10 @@ public class Placement : MonoBehaviour {
     {
         if (active)
         {
-            if (placingNowScript.CanPlace())
+            if (canPlace)
             {
-                placingNow.GetComponent<Renderer>().material = placingNowMAT;
+                placingNow.GetComponentInChildren<Renderer>().material = placingNowMAT;
+                placingNow.layer = placingNowLayer;
                 placingNow = null;
             }
         }

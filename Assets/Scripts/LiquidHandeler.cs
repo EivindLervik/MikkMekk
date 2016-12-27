@@ -1,14 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public enum PipeType
-{
-    Straight, Turn, Tri, Quad, Corner, OpenCorner, FullNormal, Star
-}
-
 public class LiquidHandeler : Placeable {
 
-    public PipeType pipeType;
+    public PipeDirection[] outputs;
 
     void Start () {
 	    
@@ -20,6 +15,19 @@ public class LiquidHandeler : Placeable {
 
     public override bool CanPlace()
     {
+        return base.CanPlace();
+    }
+
+    public bool HasRightDirection(PipeDirection pIn)
+    {
+        foreach (PipeDirection p in outputs)
+        {
+            if(p.transform.forward == -pIn.transform.forward)
+            {
+                return true;
+            }
+        }
+
         return false;
     }
 }
