@@ -46,29 +46,7 @@ public class Placement : MonoBehaviour {
             if(placingNow.transform.position != placePos)
             {
                 placingNow.transform.position = placePos;
-
-                // Can the object be placed based on own rules?
-                if (placingNowScript.CanPlace())
-                {
-                    placingNow.GetComponentInChildren<Renderer>().material = canPlaceMAT;
-                    canPlace = true;
-                }
-                else
-                {
-                    placingNow.GetComponentInChildren<Renderer>().material = canNotPlaceMAT;
-                    canPlace = false;
-                }
-
-                // Is inside something?
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, Vector3.Distance(cam.transform.position, placingNow.transform.position), placementMask))
-                {
-                    if(Vector3.Distance(hit.transform.position, placingNow.transform.position) < 0.5f)
-                    {
-                        placingNow.GetComponentInChildren<Renderer>().material = canNotPlaceMAT;
-                        canPlace = false;
-                    }
-                }
+                UpdateObject();
             }
         }
     }
@@ -106,15 +84,53 @@ public class Placement : MonoBehaviour {
             {
                 placingNow.GetComponentInChildren<Renderer>().material = placingNowMAT;
                 placingNow.layer = placingNowLayer;
+                placingNowScript.Setup();
                 placingNow = null;
             }
         }
     }
+    public void Rotate(Vector3 rot)
+    {
+        if (active)
+        {
+            placingNowScript.Rotate(rot);
+            UpdateObject();
+        }
+    }
+
 
     public void ChangeObject(int way)
     {
         currentlySelected= Mathf.Clamp(currentlySelected + way, 0, placeables.Length-1);
         Destroy(placingNow);
-        print(currentlySelected);
+    }
+
+
+    private void UpdateObject()
+    {
+        Ray ray = new Ray(cam.transform.position, cam.transform.forward);
+
+        // Can the object be placed based on own rules?
+        if (placingNowScript.CanPlace())
+        {
+            placingNow.GetComponentInChildren<Renderer>().material = canPlaceMAT;
+            canPlace = true;
+        }
+        else
+        {
+            placingNow.GetComponentInChildren<Renderer>().material = canNotPlaceMAT;
+            canPlace = false;
+        }
+
+        // Is inside something?
+        RaycastHit[] hits = Physics.RaycastAll(ray, Vector3.Distance(cam.transform.position, placingNow.transform.position), placementMask);
+        foreach(RaycastHit hit in hits)
+        {
+            if (Vector3.Distance(hit.transform.position, placingNow.transform.position) < 0.5f)
+            {
+                placingNow.GetComponentInChildren<Renderer>().material = canNotPlaceMAT;
+                canPlace = false;
+            }
+        }
     }
 }

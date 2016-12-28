@@ -7,6 +7,9 @@ public class PlayerControls : MonoBehaviour {
     public string frontbackAxis;
     public string jump;
     public string place;
+    public string rotateObjectX;
+    public string rotateObjectY;
+    public string rotateObjectZ;
 
     // Mouse
     public string mouseX;
@@ -58,6 +61,12 @@ public class PlayerControls : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             p.ChangeObject(1);
+        }
+
+        // Rotate the placed object
+        if(Input.GetButtonDown(rotateObjectX) || Input.GetButtonDown(rotateObjectY) || Input.GetButtonDown(rotateObjectZ))
+        {
+            p.Rotate(new Vector3(Mathf.Ceil(Input.GetAxis(rotateObjectX)), Mathf.Ceil(Input.GetAxis(rotateObjectY)), Mathf.Ceil(Input.GetAxis(rotateObjectZ))));
         }
     }
 }
